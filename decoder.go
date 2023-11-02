@@ -6,13 +6,18 @@ import (
 	"math"
 )
 
+var detectors = NewPool[*gocv.QRCodeDetector](func() *gocv.QRCodeDetector {
+	v := gocv.NewQRCodeDetector()
+	return &v
+})
+
 func distance(p1 image.Point, p2 image.Point) float64 {
 	return math.Sqrt(math.Pow(float64(p2.X-p1.X), 2) + math.Pow(float64(p2.Y-p1.Y), 2))
 }
 
 func DecodeQrCode(input gocv.Mat) (content string) {
-	detector := gocv.NewQRCodeDetector()
-	defer detector.Close()
+	detector := detectors.Borrow()
+	defer detectors.Put(detector)
 	corners := gocv.NewMat()
 	defer corners.Close()
 	res := detector.Detect(input, &corners)
