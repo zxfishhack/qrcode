@@ -7,6 +7,17 @@ Thanks to [GoCV](https://github.com/hybridgroup/gocv)
 
 Docker image: `zxfishhack/qrcode`
 
+## Usage
+
+url: /
+content-type: multipart/form
+
+|field| description             |                  |
+|---|-------------------------|------------------|
+|url| url of qrcode image     | optional         |
+|file| content of qrcode image | optional,higher priority |
+
+
 ## Benchmark
 
 Machine: MacBook Pro 14" 2021, Apple M1 Pro (10 Cores), 32G

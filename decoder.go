@@ -43,7 +43,11 @@ func DecodeQrCode(input gocv.Mat) (content string) {
 	dst := gocv.NewMat()
 	defer dst.Close()
 	gocv.WarpPerspective(input, &dst, transform, image.Point{X: input.Cols(), Y: input.Rows()})
-	dummy := gocv.NewMat()
-	defer dummy.Clone()
-	return detector.Decode(dst, dummy, &corners)
+	rect := gocv.NewMatWithSize(pointRect.Size(), 1, gocv.MatTypeCV32SC2)
+	defer rect.Clone()
+	for idx, p := range pointRect.ToPoints() {
+		rect.SetIntAt(idx, 0, int32(p.X))
+		rect.SetIntAt(idx, 1, int32(p.Y))
+	}
+	return detector.Decode(dst, rect, &corners)
 }
