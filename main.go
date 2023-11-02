@@ -15,6 +15,9 @@ func main() {
 		if url == "" {
 			var err error
 			f, _, err = r.FormFile("file")
+			for k := range r.Form {
+				log.Print(k)
+			}
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
