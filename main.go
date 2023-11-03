@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/h2non/filetype"
+	"github.com/h2non/filetype/matchers"
 	"gocv.io/x/gocv"
 	"io"
 	"log"
@@ -9,6 +11,11 @@ import (
 )
 
 func main() {
+	acceptFileType := matchers.Map{
+		matchers.TypeJpeg: matchers.Jpeg,
+		matchers.TypePng:  matchers.Png,
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		url := r.FormValue("url")
 		var f io.Reader
@@ -32,6 +39,10 @@ func main() {
 		}
 		b, err := io.ReadAll(f)
 		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if !filetype.MatchesMap(b, acceptFileType) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
