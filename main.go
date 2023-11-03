@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/h2non/filetype"
 	"github.com/h2non/filetype/matchers"
 	"gocv.io/x/gocv"
@@ -52,7 +52,7 @@ func main() {
 			return
 		}
 		defer m.Close()
-		fmt.Fprint(w, DecodeQrCode(m))
+		json.NewEncoder(w).Encode(WxDecodeQrCodeMulti(m))
 	})
 
 	log.Print("server start @ :8080")

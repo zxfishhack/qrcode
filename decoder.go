@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/zxfishhack/qrcode/result"
 	"gocv.io/x/gocv"
 	"image"
 	"math"
@@ -15,17 +16,7 @@ func distance(p1 image.Point, p2 image.Point) float64 {
 	return math.Sqrt(math.Pow(float64(p2.X-p1.X), 2) + math.Pow(float64(p2.Y-p1.Y), 2))
 }
 
-func DecodeQrCode(input gocv.Mat) (content string) {
-	detector := detectors.Borrow()
-	defer detectors.Put(detector)
-	corners := gocv.NewMat()
-	defer corners.Close()
-	res := detector.Detect(input, &corners)
-	if !res {
-		return
-	}
-	vp := gocv.NewPointVectorFromMat(corners)
-	defer vp.Close()
+func decodeQrCode(detector *gocv.QRCodeDetector, input gocv.Mat, vp gocv.PointVector) (res *result.Result) {
 	rr := gocv.MinAreaRect(vp)
 	pointRect := gocv.NewPointVectorFromPoints(rr.Points)
 	defer pointRect.Close()
@@ -54,5 +45,56 @@ func DecodeQrCode(input gocv.Mat) (content string) {
 		rect.SetIntAt(idx, 0, int32(p.X))
 		rect.SetIntAt(idx, 1, int32(p.Y))
 	}
-	return detector.Decode(dst, rect, &corners)
+	straightQrcode := gocv.NewMat()
+	defer straightQrcode.Close()
+	content := detector.Decode(dst, rect, &straightQrcode)
+
+	res = &result.Result{
+		Content: content,
+	}
+	res.SetPointVector(vp)
+	return
+}
+
+// DecodeQrCode
+// Result: First QrCode in image
+func DecodeQrCode(input gocv.Mat) (res *result.Result) {
+	detector := detectors.Borrow()
+	defer detectors.Put(detector)
+	corners := gocv.NewMat()
+	defer corners.Close()
+	found := detector.Detect(input, &corners)
+	if !found {
+		return
+	}
+	vp := gocv.NewPointVectorFromMat(corners)
+	defer vp.Close()
+	return decodeQrCode(detector, input, vp)
+}
+
+// DecodeQrCodeMulti
+// Result: csv format
+// content,Left,Top,Width,Height
+func DecodeQrCodeMulti(input gocv.Mat) (res []*result.Result) {
+	detector := detectors.Borrow()
+	defer detectors.Put(detector)
+	corners := gocv.NewMat()
+	defer corners.Close()
+	found := detector.DetectMulti(input, &corners)
+	if !found {
+		return
+	}
+	for j := 0; j < corners.Rows(); j++ {
+		vp := gocv.NewPointVector()
+		for i := 0; i < corners.Cols(); i++ {
+			p := corners.GetVecfAt(j, i)
+			vp.Append(image.Pt(int(p[0]), int(p[1])))
+		}
+		v := decodeQrCode(detector, input, vp)
+		vp.Close()
+		if v != nil {
+			res = append(res, v)
+		}
+	}
+	return
 }

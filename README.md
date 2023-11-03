@@ -31,6 +31,6 @@ goos: darwin
 goarch: arm64
 pkg: github.com/zxfishhack/qrcode
 BenchmarkDecodeQrCode
-BenchmarkDecodeQrCode-10    	       7	 155883030 ns/op	     512 B/op	       9 allocs/op
+BenchmarkDecodeQrCode-10    	     138	   8824558 ns/op	     360 B/op	      14 allocs/op
 PASS
 ```
