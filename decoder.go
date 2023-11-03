@@ -52,7 +52,7 @@ func decodeQrCode(detector *gocv.QRCodeDetector, input gocv.Mat, vp gocv.PointVe
 	res = &result.Result{
 		Content: content,
 	}
-	res.SetPointVector(vp)
+	setPointVector(res, vp)
 	return
 }
 

@@ -24,7 +24,7 @@ func WxDecodeQrCodeMulti(input gocv.Mat) (res []*result.Result) {
 		for i := 0; i < p.Rows(); i++ {
 			vp.Append(image.Pt(int(p.GetFloatAt(i, 0)), int(p.GetFloatAt(i, 1))))
 		}
-		v.SetPointVector(vp)
+		setPointVector(v, vp)
 		vp.Close()
 		res = append(res, v)
 	}
